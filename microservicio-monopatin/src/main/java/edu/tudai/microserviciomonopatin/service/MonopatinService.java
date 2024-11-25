@@ -53,7 +53,7 @@ public class MonopatinService {
         return monopatinRepository.findMonopatinesCercanos(latitud, longitud, radio);
     }
 
-    public List<Monopatin> obtenerMonopatinesKilometros(Double km) {
+    public List<Monopatin> obtenerMonopatinesKilometros(Double km, boolean pausa) {
         return monopatinRepository.findMonopatinesKilometros(km);
     }
 

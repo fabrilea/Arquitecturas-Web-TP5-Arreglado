@@ -53,6 +53,10 @@ public class FacturaService {
     /************************************************************/
 
     public double obtenerTotalFacturado(int anio, int mesInicio, int mesFin) {
+        for (Factura factura : facturaRepository.findAll()) {
+            factura.calcularMontoTotal();
+            facturaRepository.save(factura);
+        }
         return facturaRepository.obtenerTotalFacturado(anio, mesInicio, mesFin);
     }
 }

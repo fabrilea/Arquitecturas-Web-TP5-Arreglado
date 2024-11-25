@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -91,30 +93,41 @@ public class MantenimientoService {
 
     public List<ReporteKilometrosDTO> generarReporteUsoMonopatines(boolean incluirPausas) {
         List<ViajeDTO> viajes = viajeClient.getAllViajes();
-        return viajes.stream()
-                //Usa un flujo (Stream) para procesar cada viaje
-                // de la lista viajes y transformar los datos en objetos ReporteKilometrosDTO.
+
+        // Agrupar por MonopatinId y consolidar datos
+        Map<Long, ReporteKilometrosDTO> reporteMap = viajes.stream()
                 .map(v -> {
                     double tiempoTotal = v.getTiempoUso();
 
+                    if (!incluirPausas && v.getPausas() != null) {
+                        double tiempoPausas = v.getPausas().stream()
+                                .filter(p -> p.getFin() != null) // Ignora pausas en curso
+                                .mapToDouble(p -> Duration.between(p.getInicio(), p.getFin()).toMinutes())
+                                .sum();
+                        tiempoTotal -= tiempoPausas;
+                    }
 
-
-                        if (!incluirPausas && v.getPausas() != null) {
-                            double tiempoPausas = v.getPausas().stream()
-                                    .filter(p -> p.getFin() != null) // Ignora pausas en curso
-                                    .mapToDouble(p -> Duration.between(p.getInicio(), p.getFin()).toMinutes())
-                                    .sum();
-                            tiempoTotal -= tiempoPausas;
-                        }
-                if (v.getKilometrosRecorridos() > 100) {
                     return new ReporteKilometrosDTO(
-                            v.getMonopatinId(), v.getKilometrosRecorridos(), tiempoTotal);
-                } else {
-                    return null;
-                }
+                            v.getMonopatinId(),
+                            v.getKilometrosRecorridos(),
+                            tiempoTotal
+                    );
                 })
-                .collect(Collectors.toList());
+                .filter(dto -> dto.getKilometrosRecorridos() > 100) // Filtrar solo los relevantes
+                .collect(Collectors.toMap(
+                        ReporteKilometrosDTO::getMonopatinId, // Usar MonopatinId como clave
+                        dto -> dto, // Usar el DTO como valor
+                        (dto1, dto2) -> new ReporteKilometrosDTO(
+                                dto1.getMonopatinId(),
+                                dto1.getKilometrosRecorridos() + dto2.getKilometrosRecorridos(), // Sumar kilómetros
+                                dto1.gettiempoTotal() + dto2.gettiempoTotal() // Sumar tiempo
+                        )
+                ));
+
+        // Convertir el Map a una lista
+        return new ArrayList<>(reporteMap.values());
     }
+
 
     //Propósito:
     //    Generar un reporte de uso de monopatines con información sobre kilómetros recorridos y tiempo de uso, ajustado según las pausas si se especifica.

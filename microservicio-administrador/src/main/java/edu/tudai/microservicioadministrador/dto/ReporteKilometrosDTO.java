@@ -3,12 +3,12 @@ package edu.tudai.microservicioadministrador.dto;
 public class ReporteKilometrosDTO {
     private Long monopatinId;
     private double kilometrosRecorridos;
-    private double tiempoPausado;
+    private double tiempoTotal;
 
-    public ReporteKilometrosDTO(Long monopatinId, double kilometrosRecorridos, double tiempoPausado) {
+    public ReporteKilometrosDTO(Long monopatinId, double kilometrosRecorridos, double tiempoTotal) {
         this.monopatinId = monopatinId;
         this.kilometrosRecorridos = kilometrosRecorridos;
-        this.tiempoPausado = tiempoPausado;
+        this.tiempoTotal = tiempoTotal;
     }
 
     // Getters y setters
@@ -24,11 +24,11 @@ public class ReporteKilometrosDTO {
         return kilometrosRecorridos;
     }
 
-    public double getTiempoPausado() {
-        return tiempoPausado;
+    public double gettiempoTotal() {
+        return tiempoTotal;
     }
 
-    public void setTiempoPausado(double tiempoPausado) {
-        this.tiempoPausado = tiempoPausado;
+    public void settiempoTotal(double tiempoTotal) {
+        this.tiempoTotal = tiempoTotal;
     }
 }
